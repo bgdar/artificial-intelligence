@@ -1,30 +1,5 @@
-# Plagialisme_code-NLP
-Sistem pendeteksi plagialisme code degan algoritma NLP dan mechin learning 
+## Artificial intelligence
 
+# __ NLP __
 
-### example alur 
-   +-------------+
-   |  Kode Baru  |. <- inputan code baru 
-   +------+------+  
-          |
-          v
-  +---------------+
-  | Preprocessing |
-  | (normalisasi) |
-  +---------------+
-          |
-          v
-  +----------------------+
-  | Representasi Kode    | <-- TF-IDF / AST / Embedding
-  +----------------------+
-          |
-          v
-  +----------------------------+
-  | Bandingkan dengan Database |
-  +----------------------------+
-          |
-          v
-  +------------------------+
-  | Hasil & Referensi Mirip |.  
-  +------------------------+
-  
+# __ NN __
