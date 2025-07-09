@@ -1,8 +1,10 @@
 #ifndef OPERASI_VECTOR_HPP_
 #define OPERASI_VECTOR_HPP_
 
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
+#include <iterator>
 #include <ostream>
 #include <random>
 #include <utility>
@@ -344,6 +346,236 @@ minmax_scaling(const std::vector<std::vector<std::valarray<T>>> &A,
   }
 
   return B;
+}
+
+/**
+ * @brief fungsi untuk mencari suatu index dari nilai maximum dalam 1 vector
+ * tunggal [2.0,5.0,3.0,1.2,3.3,4.5] = nilai tertinggi 5.0 dan Outputnya 1 (5.0
+ * di index 1)
+ *
+ *  @tparam T      : type data vector yang di berikan
+ *  @param A       : vector yang di hitung argmax nya
+ *  @return size_t : posisi index nilai tertinggi nya
+ */
+template <typename T> size_t argmax(const std::vector<std::valarray<T>> &A) {
+  // ambil jumlah baris dan kolom
+  const auto shape = get_shape(A);
+  // validasi apakah vetor dengan baris tunggal
+  if (shape.first != 1) {
+    std::cerr << "ERROR di fungsi :" << __func__ << ":";
+    std::cerr << "vectornya tidak support degan fungsi argmax \n";
+    std::exit(EXIT_FAILURE);
+  }
+  // cari index di salah 1 element maxsimum-nya
+  // std::distance   : menghitung silisis antara iterator2 lain(banding nilai yg
+  // paling tinggi di vector) std:: begin     : sebagai iterasi awal dari suatu
+  // vector std::max_element: mencari iterator ke element yg maxsimum std::end
+  // : sebagai iterator di akhrinya
+  return std::distance(std::begin(A[0]),
+                       std::max_element(std::begin(A[0]), std::end(A[0])));
+}
+
+/*@brief perkalian matrix (overide) dengan scallar tertentu , misalnya
+ * matrix : [[1,2],[3,4]]
+ * value  : 2
+ * Ouput  : [[2,4],[6,8]]
+ * overload nantik x perkalian di c++
+ *
+ * @tparam T    : type data yang di berikan
+ * @param A     : vector yang akan di kalikan dengan nilai scalar
+ * @param value : nilai scalar
+ * @return std::vector<<std::vallaray<T>> hasil perkalian-nya */
+template <typename T>
+std::vector<std::valarray<T>> operator*(const std::vector<std::valarray<T>> &A,
+                                        const T &value) {
+  // buat vector baru dengan copy dari value A ke vector B
+  std::vector<std::valarray<T>> B = A;
+  // loop setiap baris dan kalikan dengan nilai scallar (value)
+  for (auto &row : B) {
+    row *= value;
+  }
+  return B;
+}
+
+/*@brief penambahan matrix (overide) dengan scallar tertentu , misalnya
+ * matrix : [[1,2],[3,4]]
+ * value  : 2
+ * Ouput  : [[3,4],[5,6]]
+ * overload nantik x perkalian di c++
+ *
+ * @tparam T    : type data yang di berikan
+ * @param A     : vector yang akan di tambahkan dengan nilai scalar
+ * @param value : nilai scalar
+ * @return std::vector<<std::vallaray<T>> hasil penambahan-nya */
+template <typename T>
+std::vector<std::valarray<T>> operator+(const std::vector<std::valarray<T>> &A,
+                                        const T &value) {
+  // buat vector baru dengan copy dari value A ke vector B
+  std::vector<std::valarray<T>> B = A;
+  // loop setiap baris dan tambahkan dengan nilai scallar (value)
+  for (auto &row : B) {
+    row += value;
+  }
+  return B;
+}
+
+/*@brief pembagian matrix (overide) dengan scallar tertentu , misalnya
+ * matrix : [[1,2],[3,4]]
+ * value  : 2
+ * Ouput  : [[2,1],[1,2]]
+ * overload nantik x perkalian di c++
+ *
+ * @tparam T    : type data yang di berikan
+ * @param A     : vector yang akan di kalikan dengan nilai scalar
+ * @param value : nilai scalar
+ * @return std::vector<<std::vallaray<T>> hasil pembagian-nya */
+template <typename T>
+std::vector<std::valarray<T>> operator/(const std::vector<std::valarray<T>> &A,
+                                        const T &value) {
+  // buat vector baru dengan copy dari value A ke vector B
+  std::vector<std::valarray<T>> B = A;
+  // loop setiap baris dan bagikan dengan nilai scallar (value)
+  for (auto &row : B) {
+    row /= value;
+  }
+  return B;
+}
+
+/*@brief pengurangan matrix (overide) dengan scallar tertentu , misalnya
+ * matrix : [[1,2],[3,4]]
+ * value  : 2
+ * Ouput  : [[-1,0],[1,2]]
+ * overload nantik x perkalian di c++
+ *
+ * @tparam T    : type data yang di berikan
+ * @param A     : vector yang akan di kurangkan dengan nilai scalar
+ * @param value : nilai scalar
+ * @return std::vector<<std::vallaray<T>> hasil pengurangan-nya */
+template <typename T>
+std::vector<std::valarray<T>> operator-(const std::vector<std::valarray<T>> &A,
+                                        const T &value) {
+  // buat vector baru dengan copy dari value A ke vector B
+  std::vector<std::valarray<T>> B = A;
+  // loop setiap baris dan kurangkan dengan nilai scallar (value)
+  for (auto &row : B) {
+    row -= value;
+  }
+  return B;
+}
+
+/**
+ * @brif fungsi untuk mentrasfor ukuran dari matrix , misalnya
+ * [1,2,3] => [1,4] baris jadi kolom
+ * [4,5,6]    [2,5] baris menjadi kolom
+ *            [3,6]
+ *
+ * @tparam T : type data yg di berikan
+ * @param A  : vector atau matrix yang akan di traspose
+ * @return std::vector<std::valarray<T>> : hasil traspose dari matrix
+ */
+template <typename T>
+std::vector<std::valarray<T>>
+transpose(const std::vector<std::valarray<T>> &A) {
+  // ambil ukuran | shape untuk di traspose ( jumlah Baris & column)
+  const auto shape = get_shape(A);
+  // fungsi untuk membuat salinan baru A -> B (copy) agar nilai asli A tidak
+  // kegangu
+  std::vector<std::valarray<T>> B;
+  // loop unutk merubahnya
+  for (size_t j = 0; j < shape.second /*column*/; j++) {
+    // buat 1 baris untuk memisah transpose ( panjangnya sama karena berasal
+    // dari baris lama)
+    std::valarray<T> row;
+    row.resize(shape.first /*baris*/);
+    // loop untuk mengisis baris baru dari column ,ambil element ke-i dari kolom
+    // j
+    for (size_t i = 0; i < shape.first; i++) {
+      // ubah dari kolom ke baris | baris ke kolom
+      row[i] = A[i][j];
+    }
+    B.push_back(row);
+  }
+  return B;
+}
+
+/**
+ * @brif fungsi menambahkan 2 vector | matrix sekaligus , misalnya :
+ * A : [1,2]  B : [5,6] = [6,8]
+ *     [3,4]      [7,8]   [10,12]
+ * Overiding operator tandan '+'
+ *
+ * @tparam T : tipe daya yang akan di berikan
+ * @param A  : matrix A
+ * @param B  : matrix B
+ * @return  std::vector<std::valarray<T>> : hasil penjumlahan matrix A + B
+ */
+template <typename T>
+std::vector<std::valarray<T>>
+operator+(const std::vector<std::valarray<T>> &A,
+          const std::vector<std::valarray<T>> &B) {
+  // ambil panjang kolom dan baris
+  const auto shape_a = get_shape(A);
+  const auto shape_b = get_shape(B);
+  // validasi apakah baris dan kolom sama
+  if (shape_a.second != shape_b.second) {
+    std::cerr << "ERROR di fungsi :" << __func__ << ":";
+    std::cerr << "matrix nya memiliki ukuran kolom yang berbeda ";
+    std::cerr << "kolom A :" << shape_a.second << "kolom B :" << shape_b.second;
+    std::exit(EXIT_FAILURE);
+  }
+  if (shape_a.first != shape_b.first) {
+    std::cerr << "ERROR di fungsi :" << __func__ << ":";
+    std::cerr << "matrix nya memiliki ukuran baris yang berbeda ";
+    std::cerr << "baris A :" << shape_a.first << "baris B :" << shape_b.first;
+    std::exit(EXIT_FAILURE);
+  }
+  // tambahkan setiap vector
+  // copyan ke c
+  std::vector<std::valarray<T>> C;
+  for (size_t i = 0; i < A.size(); i++) {
+    C.push_back(A[i] + B[i]);
+  }
+  return C;
+}
+
+/**
+ * @brif fungsi mengurangkan 2 vector | matrix sekaligus , misalnya :
+ * A : [1,2]  B : [5,6] = [6,8]
+ *     [3,4]      [7,8]   [10,12]
+ * Overiding operator tandan '-'
+ *
+ * @tparam T : tipe daya yang akan di berikan
+ * @param A  : matrix A
+ * @param B  : matrix B
+ * @return  std::vector<std::valarray<T>> : hasil pengurangan matrix A + B
+ */
+template <typename T>
+std::vector<std::valarray<T>>
+operator-(const std::vector<std::valarray<T>> &A,
+          const std::vector<std::valarray<T>> &B) {
+  // ambil panjang kolom dan baris
+  const auto shape_a = get_shape(A);
+  const auto shape_b = get_shape(B);
+  // validasi apakah baris dan kolom sama
+  if (shape_a.second != shape_b.second) {
+    std::cerr << "ERROR di fungsi :" << __func__ << ":";
+    std::cerr << "matrix nya memiliki ukuran kolom yang berbeda ";
+    std::cerr << "kolom A :" << shape_a.second << "kolom B :" << shape_b.second;
+    std::exit(EXIT_FAILURE);
+  }
+  if (shape_a.first != shape_b.first) {
+    std::cerr << "ERROR di fungsi :" << __func__ << ":";
+    std::cerr << "matrix nya memiliki ukuran baris yang berbeda ";
+    std::cerr << "baris A :" << shape_a.first << "baris B :" << shape_b.first;
+    std::exit(EXIT_FAILURE);
+  }
+  // tambahkan setiap vector
+  // copyan ke c
+  std::vector<std::valarray<T>> C;
+  for (size_t i = 0; i < A.size(); i++) {
+    C.push_back(A[i] - B[i]);
+  }
+  return C;
 }
 
 #endif // OPERASI_VECTOR_HPP_

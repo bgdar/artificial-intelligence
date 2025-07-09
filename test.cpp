@@ -56,17 +56,17 @@ int main() {
   // }
 
   // CONTOH random data dummy
-  std::vector<std::valarray<double>> matriks;
-  std::pair<size_t, size_t> shape = {3, 4}; // 3 x 4 (3 baris 4column)
-  double low = 0.0, high = 1.0;
-
-  unifrom_random_initialization(matriks, shape, low, high);
-
-  std::cout.precision(4); // ambil 4 baris aja
-  std::cout << "matrix inisialisais yg di acak " << std::endl;
-  for (const auto &row : matriks) {
-    std::cout << row << std::endl;
-  }
+  // std::vector<std::valarray<double>> matriks;
+  // std::pair<size_t, size_t> shape = {3, 4}; // 3 x 4 (3 baris 4column)
+  // double low = 0.0, high = 1.0;
+  //
+  // unifrom_random_initialization(matriks, shape, low, high);
+  //
+  // std::cout.precision(4); // ambil 4 baris aja
+  // std::cout << "matrix inisialisais yg di acak " << std::endl;
+  // for (const auto &row : matriks) {
+  //   std::cout << row << std::endl;
+  // }
 
   // CONTOH inisialisasi matrix
   // std::vector<std::valarray<double>> matrix;
@@ -112,19 +112,74 @@ int main() {
   //           << "\n";
 
   // CONTOH minman scalling
-  std::vector<std::vector<std::valarray<double>>> dataset = {
-      {{1.0, 2.0}},
-      {{3.0, 4.0}},
-      {{5.0, 6.0}},
-  };
-  auto normalisasi = minmax_scaling(dataset, 0.0, 1.0); // rentang 0.0 - 1.0
-  for (const auto &sampel : normalisasi) {
-    for (const auto &layer : sampel) {
-      for (double value : layer) {
-        std::cout << value << " ";
-      }
-      std::cout << std::endl;
+  // std::vector<std::vector<std::valarray<double>>> dataset = {
+  //     {{1.0, 2.0}},
+  //     {{3.0, 4.0}},
+  //     {{5.0, 6.0}},
+  // };
+  // auto normalisasi = minmax_scaling(dataset, 0.0, 1.0); // rentang 0.0 - 1.0
+  // for (const auto &sampel : normalisasi) {
+  //   for (const auto &layer : sampel) {
+  //     for (double value : layer) {
+  //       std::cout << value << " ";
+  //     }
+  //     std::cout << std::endl;
+  //   }
+  // }
+
+  // CONTOH argmax
+  // std::vector<std::valarray<double>> nilainya = {{2.0, 3.4, 5.0, 3.2, 1.2}};
+  // size_t index_tertinggi = argmax(nilainya);
+  // std::cout << "nilai index maximum terdapa pad index " << index_tertinggi
+  //           << "\n";
+
+  // CONTOH perkalian matrix
+  // std::vector<std::valarray<int>> matrixs = {{1, 2}, {3, 4}};
+  //
+  // std::vector<std::valarray<int>> resultkali = matrixs * 3;
+  // for (const auto &row : resultkali) {
+  //   for (int value : row) {
+  //     std::cout << value << " ";
+  //   }
+  //   std::cout << "\n";
+  // }
+  // std::cout << "\n";
+  // std::vector<std::valarray<int>> resulttambah = matrixs + 3;
+  // for (const auto &row : resulttambah) {
+  //   for (int value : row) {
+  //     std::cout << value << " ";
+  //   }
+  //   std::cout << "\n";
+  // }
+  // std::cout << "\n";
+  // std::vector<std::valarray<int>> resultkurang = matrixs - 3;
+  // for (const auto &row : resultkurang) {
+  //   for (int value : row) {
+  //     std::cout << value << " ";
+  //   }
+  //   std::cout << "\n";
+  // }
+  // std::cout << "\n";
+
+  // // CONTOH traspose
+  // std::vector<std::valarray<int>> matriks = {{1, 2, 3}, {4, 5, 6}};
+  // std::vector<std::valarray<int>> matriks_baru = transpose(matriks);
+  // for (const auto A : matriks_baru) {
+  //   for (int value : A) {
+  //     std::cout << value << " ";
+  //   }
+  //   std::cout << " \n";
+  // }
+
+  // CONTOH penambhana Array
+  std::vector<std::valarray<int>> matrix_A = {{1, 2, 3}, {4, 5, 6}};
+  std::vector<std::valarray<int>> matrix_B = {{7, 8, 9}, {10, 11, 12}};
+  std::vector<std::valarray<int>> matrix_result = matrix_A + matrix_B;
+  for (const auto &row : matrix_result) {
+    for (int value : row) {
+      std::cout << value << " ";
     }
+    std::cout << "\n";
   }
 
   return 0;
