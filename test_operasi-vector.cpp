@@ -172,10 +172,35 @@ int main() {
   // }
 
   // CONTOH penambhana Array
-  std::vector<std::valarray<int>> matrix_A = {{1, 2, 3}, {4, 5, 6}};
-  std::vector<std::valarray<int>> matrix_B = {{7, 8, 9}, {10, 11, 12}};
-  std::vector<std::valarray<int>> matrix_result = matrix_A + matrix_B;
-  for (const auto &row : matrix_result) {
+  // std::vector<std::valarray<int>> matrix_A = {{1, 2, 3}, {4, 5, 6}};
+  // std::vector<std::valarray<int>> matrix_B = {{7, 8, 9}, {10, 11, 12}};
+  // std::vector<std::valarray<int>> matrix_result = matrix_A + matrix_B;
+  // for (const auto &row : matrix_result) {
+  //   for (int value : row) {
+  //     std::cout << value << " ";
+  //   }
+  //   std::cout << "\n";
+  // }
+
+  // CONTOH perkalian matriks
+  // std::vector<std::valarray<int>> matrix_a = {{1, 2, 3}, {4, 5, 6}};
+  // std::vector<std::valarray<int>> matrix_b = {{7, 8}, {9, 10}, {11, 12}};
+  //
+  // std::vector<std::valarray<int>> hasil_kali =
+  //     Operasi_Vector::perkalianMatrix(matrix_a, matrix_b);
+  //
+  // for (const auto &row : hasil_kali) {
+  //   for (const int value : row) {
+  //     std::cout << value << " ";
+  //   }
+  //   std::cout << "\n";
+  // }
+
+  // CONTOH hadamard product
+  std::vector<std::valarray<int>> matrix_a = {{1, 2}, {3, 4}};
+  std::vector<std::valarray<int>> matrix_b = {{5, 6}, {7, 8}};
+  auto hasil_hadamard = Operasi_Vector::hadamard_product(matrix_a, matrix_b);
+  for (const auto &row : hasil_hadamard) {
     for (int value : row) {
       std::cout << value << " ";
     }
