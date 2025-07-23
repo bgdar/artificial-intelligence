@@ -3,7 +3,9 @@
 
 #include <algorithm>
 #include <cmath>
-namespace Fungsi_Aktivasi {
+namespace Fungsi {
+
+namespace Aktivasi {
 
 /**
  * @brif funsgi sigmoid , akan mengambil 1 nilai numerik (x) yang di ubah ke 0
@@ -74,7 +76,27 @@ double tanh(const double &X) { return 2.0 / (1.0 + std::exp(-2.0 * X)) - 1.0; }
  * @return double : nilai turunan dari tanh
  */
 double tanh_derifatif(const double &Y) { return 1.0 - Y * Y; }
-} // namespace Fungsi_Aktivasi
 
+} // namespace Aktivasi
+namespace Helper {
+/**
+ * @brif fungsi identitas ()
+ * fungsi yang aan di kembalikan langsung degan nilai apa adanya jika tidak
+ * ingin merubah input sama sekali
+ * @tparam X : nilai yang di berikan
+ * @return double : nilai asli yang di kembalikan
+ */
+double identitas(const double &X) { return X; }
+
+/**
+ * @brif Fungsi perpangkatan
+ *
+ * @tparam X : nilai yang akan di pangkatkan
+ * @return double : hasil perpangkatan
+ */
+double pangkat(const double &X) { return X * X; };
+} // namespace Helper
+
+} // namespace Fungsi
 #endif // !FUNGSI_HPP__
 #define FUNGSI_HPP__

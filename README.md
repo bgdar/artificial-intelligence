@@ -1,4 +1,4 @@
-Neural Network 
+Neural Network (jaringan saraf tiruan)
 
 ### project started
 clone berdasarkan project berdasarkan branch 
@@ -13,7 +13,7 @@ clang++ -std=c++17 nama_file.cpp -o result
 ``` 
 ### teknik
 - `comentar` : menggunakan metode __Doxygen__ ( standar yg banyak di pakai)
-
+- `dataset`  : menggunakan dataset **iris**  
 
 ### folder
 1. `include` =menyimpan **Header Header** file file yang di butuhkan untuk neural network

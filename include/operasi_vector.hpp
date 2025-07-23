@@ -11,8 +11,6 @@
 #include <valarray>
 #include <vector>
 
-// membungkus dengan namespace (modular)
-namespace Operasi_Vector {
 /**
  * @brief custum ouput dengan 2 nilai
  * @tparam T custum type yg di gunakan
@@ -49,19 +47,10 @@ std::ostream &operator<<(std::ostream &output, const std::valarray<T> &A) {
   output << std::endl;
   return output;
 }
-// versi lain untuk menangani overflow unuk vector
-// template <typename T>
-// std::ostream &operator<<(std::ostream &os, const std::valarray<T> &A) {
-//   os.precision(4);
-//   for (size_t i = 0; i < A.size(); ++i) {
-//
-//     os << "["<< A[i];
-//     if (i < A.size() - 1)
-//       os << "] "; // spasi antar elemen
-//   }
-//   return os;
-// }
+// operator lainya di bawah bawah
 
+// membungkus dengan namespace (modular)
+namespace Operasi_Vector {
 /**
  * @brief menambahkan elemet baru ke akhir valarray
  *
@@ -215,7 +204,7 @@ void unifrom_random_initialization(std::vector<std::valarray<T>> &A,
  */
 template <typename T>
 void unit_matrix_intialization(std::vector<std::valarray<T>> &A,
-                               std::pair<size_t, size_t> &shape) {
+                               const std::pair<size_t, size_t> &shape) {
   A.clear();
   for (size_t i = 0; i < shape.first; i++) {
     // buat array baris
@@ -377,26 +366,212 @@ template <typename T> size_t argmax(const std::vector<std::valarray<T>> &A) {
                        std::max_element(std::begin(A[0]), std::end(A[0])));
 }
 
-/*@brief perkalian matrix (overide) dengan scallar tertentu , misalnya
- * matrix : [[1,2],[3,4]]
- * value  : 2
- * Ouput  : [[2,4],[6,8]]
- * overload nantik x perkalian di c++
+/**
+ * @brif fungsi apply
+ * untuk sebagai fungsi apa yang akan di gunakan untuk setiap vector
  *
- * @tparam T    : type data yang di berikan
- * @param A     : vector yang akan di kalikan dengan nilai scalar
- * @param value : nilai scalar
- * @return std::vector<<std::vallaray<T>> hasil perkalian-nya */
+ * @param T : type parameter yang di beriakan
+ */
 template <typename T>
-std::vector<std::valarray<T>> operator*(const std::vector<std::valarray<T>> &A,
-                                        const T &value) {
-  // buat vector baru dengan copy dari value A ke vector B
+std::vector<std::valarray<T>>
+apply_function(const std::vector<std::valarray<T>> &A,
+               T (*function)(const T &)) {
   std::vector<std::valarray<T>> B = A;
-  // loop setiap baris dan kalikan dengan nilai scallar (value)
-  for (auto &row : B) {
-    row *= value;
+  for (auto &b : B) {
+    b = b.apply(function);
   }
   return B;
+}
+
+/**
+ * @brif fungsi untuk mentrasfor ukuran dari matrix , misalnya
+ * [1,2,3] => [1,4] baris jadi kolom
+ * [4,5,6]    [2,5] baris menjadi kolom
+ *            [3,6]
+ *
+ * @tparam T : type data yg di berikan
+ * @param A  : vector atau matrix yang akan di traspose
+ * @return std::vector<std::valarray<T>> : hasil traspose dari matrix
+ */
+template <typename T>
+std::vector<std::valarray<T>>
+transpose(const std::vector<std::valarray<T>> &A) {
+  // ambil ukuran | shape untuk di traspose ( jumlah Baris & column)
+  const auto shape = get_shape(A);
+  // fungsi untuk membuat salinan baru A -> B (copy) agar nilai asli A tidak
+  // kegangu
+  std::vector<std::valarray<T>> B;
+  // loop unutk merubahnya
+  for (size_t j = 0; j < shape.second /*column*/; j++) {
+    // buat 1 baris untuk memisah transpose ( panjangnya sama karena berasal
+    // dari baris lama)
+    std::valarray<T> row;
+    row.resize(shape.first /*baris*/);
+    // loop untuk mengisis baris baru dari column ,ambil element ke-i dari kolom
+    // j
+    for (size_t i = 0; i < shape.first; i++) {
+      // ubah dari kolom ke baris | baris ke kolom
+      row[i] = A[i][j];
+    }
+    B.push_back(row);
+  }
+  return B;
+}
+
+/**
+ * @brif perkalian antara 2 matrix
+ *
+ * @tparam T : type data yang di berikan
+ * @param  A : vector yg memiliki kolom yg sama dengan kolom B
+ * 2param B  :  vector yang memiliki baris yang sama dengan matrix A
+ * @return B : st:vector<std::valarray<T>> hasil perkalian 2 vector
+ */
+template <typename T>
+std::vector<std::valarray<T>>
+perkalianMatrix(const std::vector<std::valarray<T>> &A,
+                const std::vector<std::valarray<T>> &B) {
+  // ambil ukuran baris dan kolom
+  const auto shape_a = get_shape(A);
+  const auto shape_b = get_shape(B);
+
+  // validasi 2 vector (kolom A != baris B)
+  if (shape_a.second != shape_b.first) {
+    std::cerr << "ERROR :" << __func__ << ":";
+    std::cerr << " tidak bisa di kalikan karena kolom dan baris antara matrix "
+                 "A dan B berbeda";
+    std::exit(EXIT_FAILURE);
+  }
+  // vector untuk menyimpan hasil
+  std::vector<std::valarray<T>> result;
+  // loop melalui vector A
+  for (size_t i = 0; i < shape_a.first; i++) {
+    // buat baris baru untuk matrix result
+    std::valarray<T> row;
+    row.resize(shape_b.second);
+    for (size_t j = 0; j < shape_b.second; j++) {
+      for (size_t k = 0; k < shape_a.second; k++) {
+        // hitung nilai element matriks
+        //  ambil element K dari baris i di matrix A
+        //  dan kalikan dengan element j di kolom K di matrix B
+        //  dan tambahkan element result dari baris[j]
+        row[j] += A[i][k] * B[k][j];
+      }
+    }
+    result.push_back(row);
+  }
+  return result;
+}
+
+/**
+ * @brif operasi hadamard product (mengalikan matriksx dengan matriks
+ * lainya tapi per elementnya ) dan menghasilkan matrix baru misalnya :
+ * [1,2] X [5,6] = [5,12]   (column dan baris hasus sama )
+ * [3,4]   [7,8]   [21,32]
+ *
+ * @tparam T :tipe data yang di berikan
+ * @param A  : matrix A
+ * @param B  : matrix B
+ * @return std::vector<<std::valarray<T>> : hasil dari perkalian matrix  A dan B
+ */
+template <typename T>
+std::vector<std::valarray<T>>
+hadamard_product(const std::vector<std::valarray<T>> &A,
+                 const std::vector<std::valarray<T>> &B) {
+  const auto shape_a = get_shape(A);
+  const auto shape_b = get_shape(B);
+  // validasi , pengecekan nilai misalnya 2x2 harus 2x2 , begitu juga 2x3 harus
+  // dengan 2x3 yakni kolom dan barisnya
+  if (shape_a.first != shape_a.first || shape_b.second != shape_b.second) {
+    std::cerr << "ERROR :" << __func__ << ":";
+    std::cerr << "matrix yang di berikan berbeda dimensi";
+    std::exit(EXIT_FAILURE);
+  }
+  // lakukan kalkulasi (perkalian)
+  std::vector<std::valarray<T>> result;
+  for (size_t i = 0; i < A.size(); i++) {
+    result.push_back(A[i] * B[i]);
+  }
+  return result;
+}
+} // namespace Operasi_Vector
+
+/**
+ * @brif fungsi menambahkan 2 vector | matrix sekaligus , misalnya :
+ * A : [1,2]  B : [5,6] = [6,8]
+ *     [3,4]      [7,8]   [10,12]
+ * Overiding operator tandan '+'
+ *
+ * @tparam T : tipe daya yang akan di berikan
+ * @param A  : matrix A
+ * @param B  : matrix B
+ * @return  std::vector<std::valarray<T>> : hasil penjumlahan matrix A + B
+ */
+template <typename T>
+std::vector<std::valarray<T>>
+operator+(const std::vector<std::valarray<T>> &A,
+          const std::vector<std::valarray<T>> &B) {
+  // ambil panjang kolom dan baris
+  const auto shape_a = Operasi_Vector::get_shape(A);
+  const auto shape_b = Operasi_Vector::get_shape(B);
+  // validasi apakah baris dan kolom sama
+  if (shape_a.second != shape_b.second) {
+    std::cerr << "ERROR di fungsi :" << __func__ << ":";
+    std::cerr << "matrix nya memiliki ukuran kolom yang berbeda ";
+    std::cerr << "kolom A :" << shape_a.second << "kolom B :" << shape_b.second;
+    std::exit(EXIT_FAILURE);
+  }
+  if (shape_a.first != shape_b.first) {
+    std::cerr << "ERROR di fungsi :" << __func__ << ":";
+    std::cerr << "matrix nya memiliki ukuran baris yang berbeda ";
+    std::cerr << "baris A :" << shape_a.first << "baris B :" << shape_b.first;
+    std::exit(EXIT_FAILURE);
+  }
+  // tambahkan setiap vector
+  // copyan ke c
+  std::vector<std::valarray<T>> C;
+  for (size_t i = 0; i < A.size(); i++) {
+    C.push_back(A[i] + B[i]);
+  }
+  return C;
+}
+/**
+ * @brif fungsi mengurangkan 2 vector | matrix sekaligus , misalnya :
+ * A : [1,2]  B : [5,6] = [6,8]
+ *     [3,4]      [7,8]   [10,12]
+ * Overiding operator tandan '-'
+ *
+ * @tparam T : tipe daya yang akan di berikan
+ * @param A  : matrix A
+ * @param B  : matrix B
+ * @return  std::vector<std::valarray<T>> : hasil pengurangan matrix A + B
+ */
+template <typename T>
+std::vector<std::valarray<T>>
+operator-(const std::vector<std::valarray<T>> &A,
+          const std::vector<std::valarray<T>> &B) {
+  // ambil panjang kolom dan baris
+  const auto shape_a = Operasi_Vector::get_shape(A);
+  const auto shape_b = Operasi_Vector::get_shape(B);
+  // validasi apakah baris dan kolom sama
+  if (shape_a.second != shape_b.second) {
+    std::cerr << "ERROR di fungsi :" << __func__ << ":";
+    std::cerr << "matrix nya memiliki ukuran kolom yang berbeda ";
+    std::cerr << "kolom A :" << shape_a.second << "kolom B :" << shape_b.second;
+    std::exit(EXIT_FAILURE);
+  }
+  if (shape_a.first != shape_b.first) {
+    std::cerr << "ERROR di fungsi :" << __func__ << ":";
+    std::cerr << "matrix nya memiliki ukuran baris yang berbeda ";
+    std::cerr << "baris A :" << shape_a.first << "baris B :" << shape_b.first;
+    std::exit(EXIT_FAILURE);
+  }
+  // tambahkan setiap vector
+  // copyan ke c
+  std::vector<std::valarray<T>> C;
+  for (size_t i = 0; i < A.size(); i++) {
+    C.push_back(A[i] - B[i]);
+  }
+  return C;
 }
 
 /*@brief penambahan matrix (overide) dengan scallar tertentu , misalnya
@@ -464,197 +639,26 @@ std::vector<std::valarray<T>> operator-(const std::vector<std::valarray<T>> &A,
   }
   return B;
 }
-
-/**
- * @brif fungsi untuk mentrasfor ukuran dari matrix , misalnya
- * [1,2,3] => [1,4] baris jadi kolom
- * [4,5,6]    [2,5] baris menjadi kolom
- *            [3,6]
+/*@brief perkalian matrix (overide) dengan scallar tertentu , misalnya
+ * matrix : [[1,2],[3,4]]
+ * value  : 2
+ * Ouput  : [[2,4],[6,8]]
+ * overload nantik x perkalian di c++
  *
- * @tparam T : type data yg di berikan
- * @param A  : vector atau matrix yang akan di traspose
- * @return std::vector<std::valarray<T>> : hasil traspose dari matrix
- */
+ * @tparam T    : type data yang di berikan
+ * @param A     : vector yang akan di kalikan dengan nilai scalar
+ * @param value : nilai scalar
+ * @return std::vector<<std::vallaray<T>> hasil perkalian-nya */
 template <typename T>
-std::vector<std::valarray<T>>
-transpose(const std::vector<std::valarray<T>> &A) {
-  // ambil ukuran | shape untuk di traspose ( jumlah Baris & column)
-  const auto shape = get_shape(A);
-  // fungsi untuk membuat salinan baru A -> B (copy) agar nilai asli A tidak
-  // kegangu
-  std::vector<std::valarray<T>> B;
-  // loop unutk merubahnya
-  for (size_t j = 0; j < shape.second /*column*/; j++) {
-    // buat 1 baris untuk memisah transpose ( panjangnya sama karena berasal
-    // dari baris lama)
-    std::valarray<T> row;
-    row.resize(shape.first /*baris*/);
-    // loop untuk mengisis baris baru dari column ,ambil element ke-i dari kolom
-    // j
-    for (size_t i = 0; i < shape.first; i++) {
-      // ubah dari kolom ke baris | baris ke kolom
-      row[i] = A[i][j];
-    }
-    B.push_back(row);
+std::vector<std::valarray<T>> operator*(const std::vector<std::valarray<T>> &A,
+                                        const T &value) {
+  // buat vector baru dengan copy dari value A ke vector B
+  std::vector<std::valarray<T>> B = A;
+  // loop setiap baris dan kalikan dengan nilai scallar (value)
+  for (auto &row : B) {
+    row *= value;
   }
   return B;
 }
-
-/**
- * @brif fungsi menambahkan 2 vector | matrix sekaligus , misalnya :
- * A : [1,2]  B : [5,6] = [6,8]
- *     [3,4]      [7,8]   [10,12]
- * Overiding operator tandan '+'
- *
- * @tparam T : tipe daya yang akan di berikan
- * @param A  : matrix A
- * @param B  : matrix B
- * @return  std::vector<std::valarray<T>> : hasil penjumlahan matrix A + B
- */
-template <typename T>
-std::vector<std::valarray<T>>
-operator+(const std::vector<std::valarray<T>> &A,
-          const std::vector<std::valarray<T>> &B) {
-  // ambil panjang kolom dan baris
-  const auto shape_a = get_shape(A);
-  const auto shape_b = get_shape(B);
-  // validasi apakah baris dan kolom sama
-  if (shape_a.second != shape_b.second) {
-    std::cerr << "ERROR di fungsi :" << __func__ << ":";
-    std::cerr << "matrix nya memiliki ukuran kolom yang berbeda ";
-    std::cerr << "kolom A :" << shape_a.second << "kolom B :" << shape_b.second;
-    std::exit(EXIT_FAILURE);
-  }
-  if (shape_a.first != shape_b.first) {
-    std::cerr << "ERROR di fungsi :" << __func__ << ":";
-    std::cerr << "matrix nya memiliki ukuran baris yang berbeda ";
-    std::cerr << "baris A :" << shape_a.first << "baris B :" << shape_b.first;
-    std::exit(EXIT_FAILURE);
-  }
-  // tambahkan setiap vector
-  // copyan ke c
-  std::vector<std::valarray<T>> C;
-  for (size_t i = 0; i < A.size(); i++) {
-    C.push_back(A[i] + B[i]);
-  }
-  return C;
-}
-
-/**
- * @brif fungsi mengurangkan 2 vector | matrix sekaligus , misalnya :
- * A : [1,2]  B : [5,6] = [6,8]
- *     [3,4]      [7,8]   [10,12]
- * Overiding operator tandan '-'
- *
- * @tparam T : tipe daya yang akan di berikan
- * @param A  : matrix A
- * @param B  : matrix B
- * @return  std::vector<std::valarray<T>> : hasil pengurangan matrix A + B
- */
-template <typename T>
-std::vector<std::valarray<T>>
-operator-(const std::vector<std::valarray<T>> &A,
-          const std::vector<std::valarray<T>> &B) {
-  // ambil panjang kolom dan baris
-  const auto shape_a = get_shape(A);
-  const auto shape_b = get_shape(B);
-  // validasi apakah baris dan kolom sama
-  if (shape_a.second != shape_b.second) {
-    std::cerr << "ERROR di fungsi :" << __func__ << ":";
-    std::cerr << "matrix nya memiliki ukuran kolom yang berbeda ";
-    std::cerr << "kolom A :" << shape_a.second << "kolom B :" << shape_b.second;
-    std::exit(EXIT_FAILURE);
-  }
-  if (shape_a.first != shape_b.first) {
-    std::cerr << "ERROR di fungsi :" << __func__ << ":";
-    std::cerr << "matrix nya memiliki ukuran baris yang berbeda ";
-    std::cerr << "baris A :" << shape_a.first << "baris B :" << shape_b.first;
-    std::exit(EXIT_FAILURE);
-  }
-  // tambahkan setiap vector
-  // copyan ke c
-  std::vector<std::valarray<T>> C;
-  for (size_t i = 0; i < A.size(); i++) {
-    C.push_back(A[i] - B[i]);
-  }
-  return C;
-}
-
-/**
- * @brif perkalian antara 2 matrix
- *
- * @tparam T : type data yang di berikan
- * @param  A : vector yg memiliki kolom yg sama dengan kolom B
- * 2param B  :  vector yang memiliki baris yang sama dengan matrix A
- * @return B : st:vector<std::valarray<T>> hasil perkalian 2 vector
- */
-template <typename T>
-std::vector<std::valarray<T>>
-perkalianMatrix(const std::vector<std::valarray<T>> &A,
-                const std::vector<std::valarray<T>> &B) {
-  // ambil ukuran baris dan kolom
-  const auto shape_a = get_shape(A);
-  const auto shape_b = get_shape(B);
-
-  // validasi 2 vector (kolom A != baris B)
-  if (shape_a.second != shape_b.first) {
-    std::cerr << "ERROR :" << __func__ << ":";
-    std::cerr << " tidak bisa di kalikan karena kolom dan baris antara matrix "
-                 "A dan B berbeda";
-    std::exit(EXIT_FAILURE);
-  }
-  // vector untuk menyimpan hasil
-  std::vector<std::valarray<T>> result;
-  // loop melalui vector A
-  for (size_t i = 0; i < shape_a.first; i++) {
-    // buat baris baru untuk matrix result
-    std::valarray<T> row;
-    row.resize(shape_b.second);
-    for (size_t j = 0; j < shape_b.second; j++) {
-      for (size_t k = 0; k < shape_a.second; k++) {
-        // hitung nilai element matriks
-        //  ambil element K dari baris i di matrix A
-        //  dan kalikan dengan element j di kolom K di matrix B
-        //  dan tambahkan element result dari baris[j]
-        row[j] += A[i][k] * B[k][j];
-      }
-    }
-    result.push_back(row);
-  }
-  return result;
-}
-
-/**
- * @brif operasi hadamard product (mengalikan matriksx dengan matriks
- * lainya tapi per elementnya ) dan menghasilkan matrix baru misalnya :
- * [1,2] X [5,6] = [5,12]   (column dan baris hasus sama )
- * [3,4]   [7,8]   [21,32]
- *
- * @tparam T :tipe data yang di berikan
- * @param A  : matrix A
- * @param B  : matrix B
- * @return std::vector<<std::valarray<T>> : hasil dari perkalian matrix  A dan B
- */
-template <typename T>
-std::vector<std::valarray<T>>
-hadamard_product(std::vector<std::valarray<T>> &A,
-                 std::vector<std::valarray<T>> &B) {
-  const auto shape_a = get_shape(A);
-  const auto shape_b = get_shape(B);
-  // validasi , pengecekan nilai misalnya 2x2 harus 2x2 , begitu juga 2x3 harus
-  // dengan 2x3 yakni kolom dan barisnya
-  if (shape_a.first != shape_a.first || shape_b.second != shape_b.second) {
-    std::cerr << "ERROR :" << __func__ << ":";
-    std::cerr << "matrix yang di berikan berbeda dimensi";
-    std::exit(EXIT_FAILURE);
-  }
-  // lakukan kalkulasi (perkalian)
-  std::vector<std::valarray<T>> result;
-  for (size_t i = 0; i < A.size(); i++) {
-    result.push_back(A[i] * B[i]);
-  }
-  return result;
-}
-} // namespace Operasi_Vector
 
 #endif // OPERASI_VECTOR_HPP_
