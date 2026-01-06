@@ -1,0 +1,4 @@
+# virtual envarioment
+venv/
+.venv/
+py-venv/
