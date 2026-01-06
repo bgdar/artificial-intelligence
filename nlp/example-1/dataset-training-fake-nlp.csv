@@ -1,0 +1,11 @@
+id,keyword,location,text,target
+1,earthquake,California,"Earthquake shaking my entire house! Scary moment.",1
+2,flood,Jakarta,"Heavy rain again... streets are flooded everywhere.",1
+3,fire,Texas,"Huge fire spotted near the highway. Hope everyone is safe.",1
+4,storm,Florida,"The storm last night was wild but no major damage here.",0
+5,explosion,Beirut,"Hearing loud explosion sounds downtown. Anyone knows what happened?",1
+6,,New York,"Just saw a weird smoke cloud in the distance.",0
+7,evacuation,Tokyo,"Authorities ordered evacuation for residents near the volcano.",1
+8,,London,"Can't believe how hot today is. Summer is crazy.",0
+9,collapse,India,"Building collapse reported due to heavy rain.",1
+10,fire,Chicago,"Just enjoying BBQ with friends haha.",0
